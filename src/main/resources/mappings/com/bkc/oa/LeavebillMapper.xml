@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bkc.oa.dao.ILeavebillDao">
+	<resultMap id="BaseResultMap" type="com.bkc.oa.entity.Leavebill">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="days" property="days" jdbcType="INTEGER" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="leaveDate" property="leavedate" jdbcType="TIMESTAMP" />
+		<result column="state" property="state" jdbcType="INTEGER" />
+		<association property="user"
+			resultMap="com.bkc.oa.dao.IEmployeeDao.BaseResultMap" />
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		id, days, content, remark, leaveDate, state, user_id
+	</sql>
+	
+	<select id="selectLeavebillList" resultMap="BaseResultMap">
+		select l.id,l.days,l.content,l.remark,l.leaveDate,l.state,
+		e.id as "user.id",e.name  as "user.name" ,e.email as "user.email" from a_leavebill l,a_employee e where l.user_id = e.id
+	</select>
+	<select id="findLeavebillListByUserid" resultMap="BaseResultMap"
+		parameterType="com.bkc.oa.entity.Employee">
+		select l.* from a_leavebill l where l.user_id = #{id}
+	</select>
+	<select id="findLeavebillById" resultMap="BaseResultMap"  >
+		select l.* from a_leavebill l where l.id = #{id}
+	</select>
+	<delete id="deleteLeavebillById" parameterType="java.lang.Long">
+		delete from
+		a_leavebill
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+    
+	<insert id="saveLeavebill" parameterType="com.bkc.oa.entity.Leavebill">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+	      select seq_leavebill.nextval from dual
+	    </selectKey>
+		insert into a_leavebill
+		(id,
+		days, content,
+		remark, leaveDate, state,
+		user_id)
+		values
+		(#{id,jdbcType=BIGINT}, #{days,jdbcType=INTEGER},
+		#{content,jdbcType=VARCHAR},
+		#{remark,jdbcType=VARCHAR},
+		#{leavedate,jdbcType=TIMESTAMP}, #{state,jdbcType=INTEGER},
+		#{user.id,jdbcType=BIGINT})
+	</insert>
+	<update id="updateLeavebill" parameterType="com.bkc.oa.entity.Leavebill">
+		update a_leavebill
+		<set>
+			<if test="days != null">
+				days = #{days,jdbcType=INTEGER},
+			</if>
+			<if test="content != null">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="leavedate != null">
+				leaveDate = #{leavedate,jdbcType=TIMESTAMP},
+			</if>
+			<if test="state != null">
+				state = #{state,jdbcType=INTEGER},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updateLeavebillState" parameterType="com.bkc.oa.entity.Leavebill">
+		update a_leavebill set state = #{state,jdbcType=INTEGER}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+</mapper>
